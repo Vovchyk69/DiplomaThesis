@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
-import { Sidebar } from './Sidebar';
+import { Sidebar } from './components/MainPage';
 
 const theme = createTheme({
   palette: {
