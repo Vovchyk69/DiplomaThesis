@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { makeStyles, Theme, createStyles } from "@material-ui/core/styles";
+import React, { useState } from 'react';
+import { makeStyles, Theme, createStyles } from '@material-ui/core/styles';
 import {
   Drawer,
   AppBar,
@@ -11,20 +11,19 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-  Input,
-  Button,
-} from "@material-ui/core";
-import MenuIcon from "@material-ui/icons/Menu";
-import InboxIcon from "@material-ui/icons/MoveToInbox";
-import MailIcon from "@material-ui/icons/Mail";
-import CloudUploadIcon from "@material-ui/icons/CloudUpload";
+} from '@material-ui/core';
+import MenuIcon from '@material-ui/icons/Menu';
+import InboxIcon from '@material-ui/icons/MoveToInbox';
+import MailIcon from '@material-ui/icons/Mail';
+import { CodeCompare } from './CodeCompare';
+import VerticalUploadTree from './Sidebar';
 
 const drawerWidth = 240;
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
-      display: "flex",
+      display: 'flex',
     },
     appBar: {
       zIndex: theme.zIndex.drawer + 1,
@@ -40,14 +39,14 @@ const useStyles = makeStyles((theme: Theme) =>
       width: drawerWidth,
     },
     drawerContainer: {
-      overflow: "auto",
+      overflow: 'auto',
     },
     content: {
       flexGrow: 1,
       padding: theme.spacing(3),
     },
     input: {
-      display: "none",
+      display: 'none',
     },
     uploadButton: {
       marginTop: theme.spacing(2),
@@ -57,12 +56,17 @@ const useStyles = makeStyles((theme: Theme) =>
 
 export const Sidebar = () => {
   const classes = useStyles();
-  const [selectedFile, setSelectedFile] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      setSelectedFile(event.target.files[0].name);
-    }
+  const handleFileSelect = (event: any, file: File) => {
+    const checkedFiles: File[] =
+      event.target.checked && selectedFiles.length === 2
+        ? selectedFiles.slice(1)
+        : selectedFiles;
+
+    event.target.checked
+      ? setSelectedFiles([...checkedFiles, file])
+      : setSelectedFiles(checkedFiles.filter((f) => f.name !== file.name));
   };
 
   return (
@@ -106,29 +110,16 @@ export const Sidebar = () => {
             </ListItem>
           </List>
           <Divider />
+          <VerticalUploadTree
+            selectedFiles={selectedFiles}
+            handleFileSelect={handleFileSelect}
+          />
         </div>
       </Drawer>
       <main className={classes.content}>
         <Toolbar />
-        <Input
-          type="file"
-          id="file-input"
-          className={classes.input}
-          onChange={handleFileUpload}
-        />
-        <label htmlFor="file-input">
-          <Button
-            variant="contained"
-            color="default"
-            component="span"
-            startIcon={<CloudUploadIcon />}
-            className={classes.uploadButton}
-          >
-            Upload
-          </Button>
-        </label>
-        {selectedFile && <Typography>{selectedFile}</Typography>}
+        <CodeCompare items={selectedFiles} />
       </main>
     </div>
   );
-}
+};
