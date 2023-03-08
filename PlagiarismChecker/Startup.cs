@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using PlagiarismChecker.AmazonS3;
 using PlagiarismChecker.Extensions;
 using System;
 using System.Collections.Generic;
@@ -34,7 +35,29 @@ namespace PlagiarismChecker
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PlagiarismChecker", Version = "v1" });
             });
 
-            services.AddMyHttpClient(""); 
+            services.AddMyHttpClient("");
+
+            var appSettings = Configuration.GetSection("AppSettings");
+            var bucketName = appSettings["bucketName"] ?? string.Empty;
+            var region = appSettings["region"] ?? string.Empty;
+            var awsAccessKeyId = appSettings["awsAccessKeyId"] ?? string.Empty;
+            var awsSecretAccessKey = appSettings["awsSecretAccessKey"] ?? string.Empty;
+
+            services
+                .AddSingleton<IAwsConfiguration>(
+                    new AwsConfiguration(awsAccessKeyId, awsSecretAccessKey, bucketName, region))
+                .AddControllers();
+
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(
+                    builder =>
+                    {
+                        builder.WithOrigins("http://localhost:3000")
+                            .AllowAnyHeader()
+                            .AllowAnyMethod();
+                    });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -47,10 +70,8 @@ namespace PlagiarismChecker
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PlagiarismChecker v1"));
             }
 
-            app.UseHttpsRedirection();
-
             app.UseRouting();
-
+            app.UseCors();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>

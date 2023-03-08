@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.IO;
 
 namespace PlagiarismChecker
 {
@@ -16,5 +19,19 @@ namespace PlagiarismChecker
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+        //public static IWebHostBuilder CreateHostBuilder(string[] args)
+        //{
+        //    var config = new ConfigurationBuilder()
+        //        .SetBasePath(Directory.GetCurrentDirectory())
+        //        .AddJsonFile("appsettings.json", optional: true)
+        //        .AddCommandLine(args)
+        //        .Build();
+
+        //    return WebHost.CreateDefaultBuilder(args)
+        //        .UseConfiguration(config)
+        //        .UseStartup<Startup>();
+        //}
+
     }
 }

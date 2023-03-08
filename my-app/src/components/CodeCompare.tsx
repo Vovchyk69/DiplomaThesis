@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import { awsAPI } from '../functions/api';
+import { AnyAaaaRecord } from 'dns';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -16,7 +18,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-interface Props{
+interface Props {
   items: File[];
 }
 
@@ -24,6 +26,19 @@ export const CodeCompare = (props: Props) => {
   const classes = useStyles();
   const [code1, setCode1] = useState('');
   const [code2, setCode2] = useState('');
+
+  useEffect(() => {
+    if (props.items.length === 0) return;
+    awsAPI
+      .post(
+        'filter',
+        props.items.map((x) => x.name)
+      )
+      .then((files: any) => {
+        setCode1(files[0]);
+        setCode2(files[1] || " ");
+      });
+  }, [props.items]);
 
   const handleCompare = () => {
     // Add logic to compare the two code snippets
@@ -69,4 +84,4 @@ export const CodeCompare = (props: Props) => {
       </Grid>
     </div>
   );
-}
+};
