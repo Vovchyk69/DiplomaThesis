@@ -16,45 +16,9 @@ import MenuIcon from '@material-ui/icons/Menu';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import { CodeCompare } from './CodeCompare';
-import VerticalUploadTree from './Sidebar';
+import Sidebar from './Sidebar';
 
-const drawerWidth = 240;
-
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      display: 'flex',
-    },
-    appBar: {
-      zIndex: theme.zIndex.drawer + 1,
-    },
-    menuButton: {
-      marginRight: theme.spacing(2),
-    },
-    drawer: {
-      width: drawerWidth,
-      flexShrink: 0,
-    },
-    drawerPaper: {
-      width: drawerWidth,
-    },
-    drawerContainer: {
-      overflow: 'auto',
-    },
-    content: {
-      flexGrow: 1,
-      padding: theme.spacing(3),
-    },
-    input: {
-      display: 'none',
-    },
-    uploadButton: {
-      marginTop: theme.spacing(2),
-    },
-  })
-);
-
-export const Sidebar = () => {
+export const MainPage = () => {
   const classes = useStyles();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
@@ -110,7 +74,7 @@ export const Sidebar = () => {
             </ListItem>
           </List>
           <Divider />
-          <VerticalUploadTree
+          <Sidebar
             selectedFiles={selectedFiles}
             handleFileSelect={handleFileSelect}
           />
@@ -118,8 +82,45 @@ export const Sidebar = () => {
       </Drawer>
       <main className={classes.content}>
         <Toolbar />
-        <CodeCompare items={selectedFiles} />
+        <CodeCompare
+          items={selectedFiles}/>
       </main>
     </div>
   );
 };
+
+const drawerWidth = 240;
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      display: 'flex',
+    },
+    appBar: {
+      zIndex: theme.zIndex.drawer + 1,
+    },
+    menuButton: {
+      marginRight: theme.spacing(2),
+    },
+    drawer: {
+      width: drawerWidth,
+      flexShrink: 0,
+    },
+    drawerPaper: {
+      width: drawerWidth,
+    },
+    drawerContainer: {
+      overflow: 'auto',
+    },
+    content: {
+      flexGrow: 1,
+      padding: theme.spacing(3),
+    },
+    input: {
+      display: 'none',
+    },
+    uploadButton: {
+      marginTop: theme.spacing(2),
+    },
+  })
+);

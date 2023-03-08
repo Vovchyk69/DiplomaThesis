@@ -30,12 +30,6 @@ export const CodeCompare = (props: Props) => {
     console.log('Comparing code1:', code1, 'and code2:', code2);
   };
 
-  // const reader = new FileReader();
-  // reader.readAsText(props.items[0]);
-  // reader.onload = (event) => {
-  //   setCode1(event.target?.result as unknown as string);
-  // };
-
   return (
     <div className={classes.root}>
       <Grid container spacing={3}>

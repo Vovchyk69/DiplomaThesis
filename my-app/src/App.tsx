@@ -1,6 +1,6 @@
 import React from 'react';
 import { ThemeProvider, createTheme } from '@material-ui/core/styles';
-import { Sidebar } from './components/MainPage';
+import { MainPage } from './components/MainPage';
 
 const theme = createTheme({
   palette: {
@@ -62,7 +62,7 @@ const theme = createTheme({
 const App: React.FC = () => {
   return (
     <ThemeProvider theme={theme}>
-      <Sidebar/>
+      <MainPage/>
     </ThemeProvider>
   );
 };

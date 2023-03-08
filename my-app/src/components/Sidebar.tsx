@@ -21,7 +21,7 @@ interface Props {
   handleFileSelect: (event: any, file: File) => void;
 }
 
-const VerticalUploadTree = (props: Props) => {
+const Sidebar = (props: Props) => {
   const classes = useStyles();
   const [files, setFiles] = useState<File[]>([]);
 
@@ -49,4 +49,4 @@ const VerticalUploadTree = (props: Props) => {
   );
 };
 
-export default VerticalUploadTree;
+export default Sidebar;
