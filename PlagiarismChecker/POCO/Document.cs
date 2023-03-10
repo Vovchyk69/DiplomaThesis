@@ -7,6 +7,6 @@ namespace PlagiarismChecker.POCO
 {
     public class Documents
     {
-        public string Document { get; init; }
+        public string document { get; init; }
     }
 }

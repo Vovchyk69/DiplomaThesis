@@ -100,9 +100,9 @@ namespace PlagiarismChecker.Controllers
             using var httpClient = new HttpClient(clientHandler);
             httpClient.DefaultRequestHeaders.Add("Cookie", "AMP_MKTG_8f1ede8e9c=JTdCJTdE; accessToken=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJhdXRoZW50aWNhdGVkIiwiZXhwIjoxNjc5MDA0MDExLCJzdWIiOiI2ZGJhMDgxOC0wN2Y0LTQyNmQtYTkzOS1hOTFlZjZiNmJlODgiLCJlbWFpbCI6InZvdmNoeWtoYWxhbWFoYUBnbWFpbC5jb20iLCJwaG9uZSI6IiIsImFwcF9tZXRhZGF0YSI6eyJwcm92aWRlciI6Imdvb2dsZSIsInByb3ZpZGVycyI6WyJnb29nbGUiXX0sInVzZXJfbWV0YWRhdGEiOnsiYXZhdGFyX3VybCI6Imh0dHBzOi8vbGgzLmdvb2dsZXVzZXJjb250ZW50LmNvbS9hL0FHTm15eFp0OHNUUk1LWEFlOXpTb2VOcHFZdU8xbnBvMi1URnFHdWVFejlzPXM5Ni1jIiwiZW1haWwiOiJ2b3ZjaHlraGFsYW1haGFAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsImZ1bGxfbmFtZSI6IlZvbG9keW15ciIsImlzcyI6Imh0dHBzOi8vd3d3Lmdvb2dsZWFwaXMuY29tL3VzZXJpbmZvL3YyL21lIiwibmFtZSI6IlZvbG9keW15ciIsInBpY3R1cmUiOiJodHRwczovL2xoMy5nb29nbGV1c2VyY29udGVudC5jb20vYS9BR05teXhadDhzVFJNS1hBZTl6U29lTnBxWXVPMW5wbzItVEZxR3VlRXo5cz1zOTYtYyIsInByb3ZpZGVyX2lkIjoiMTAxOTA5MzYyNjAxNzM3NTIwNDA2Iiwic3ViIjoiMTAxOTA5MzYyNjAxNzM3NTIwNDA2In0sInJvbGUiOiJhdXRoZW50aWNhdGVkIiwiYWFsIjoiYWFsMSIsImFtciI6W3sibWV0aG9kIjoib2F1dGgiLCJ0aW1lc3RhbXAiOjE2NzgzOTkyMTF9XSwic2Vzc2lvbl9pZCI6Ijk1OWFiYzljLTYzZTctNGNiOC1iZDM5LWMzNGU5ODNlNmNlNSJ9.uykgrl1l9Lk-9jzdDTKuVUflGqhabHvWDvPCedRvsbA; AMP_8f1ede8e9c=JTdCJTIyZGV2aWNlSWQlMjIlM0ElMjIwNGU4ZDZmMS1kN2JkLTRiYTMtODE0Zi1mZDk3MTBkNDJjNDYlMjIlMkMlMjJzZXNzaW9uSWQlMjIlM0ExNjc4Mzk3ODE0OTU4JTJDJTIyb3B0T3V0JTIyJTNBZmFsc2UlMkMlMjJsYXN0RXZlbnRUaW1lJTIyJTNBMTY3ODM5OTM3NzIyNyU3RA==");
 
-            var document1 = await _awsStorage.DownloadFileAsync(document.Document);
+            var document1 = await _awsStorage.DownloadFileAsync(document.document);
 
-            var json = JsonSerializer.Serialize(new Documents { Document = document1 });
+            var json = JsonSerializer.Serialize(new Documents { document = document1 });
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var result = await httpClient.PostAsync("https://api.gptzero.me/v2/predict/text", content);

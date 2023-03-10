@@ -6,13 +6,14 @@ import Button from '@material-ui/core/Button';
 import { awsAPI, detectionAPI } from '../functions/api';
 import { diff_match_patch } from 'diff-match-patch';
 import CompareFiles from './CompareFiles';
+import { Container, Typography } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
   },
   button: {
-    marginRight: 'auto',
+    padding: theme.spacing(2),
   },
   paper: {
     padding: theme.spacing(2),
@@ -48,19 +49,31 @@ const useStyles = makeStyles((theme) => ({
     fontWeight: 'bold',
     marginBottom: '10px',
   },
+  resultContainer: {
+    marginTop: '50px',
+  },
 }));
 
 interface Props {
   items: File[];
 }
 
-const dmp = new diff_match_patch();
+const castToMessage = (result: any) => {
+  const percentage = result.documents[0].average_generated_prob;
+  if (percentage >= 0.95 && percentage <= 1)
+    return 'Your text is likely to be written entirely by AI';
+
+  if (percentage >= 0.65 && percentage <= 0.95)
+    return 'Your text may include parts written by AI';
+
+  return 'Your text is likely to be written entirely by Human';
+};
 
 export const CodeCompare = (props: Props) => {
   const classes = useStyles();
   const [code1, setCode1] = useState('');
   const [code2, setCode2] = useState('');
-  const [diff, setDiff] = useState<any>([]);
+  const [result, setResult] = useState<any>(null);
 
   useEffect(() => {
     if (props.items.length === 0) return;
@@ -75,14 +88,12 @@ export const CodeCompare = (props: Props) => {
       });
   }, [props.items]);
 
-  const handleCompare = () => {
-    detectionAPI.post('gpt-zero', {
-      document: props.items[0].name,
-    });
-
-    const diffText = dmp.diff_main(code1, code2);
-    dmp.diff_cleanupSemantic(diffText);
-    setDiff(diffText);
+  const analyze = () => {
+    detectionAPI
+      .post('gpt-zero', {
+        document: props.items[0].name,
+      })
+      .then((result) => setResult(result));
   };
 
   return (
@@ -93,11 +104,28 @@ export const CodeCompare = (props: Props) => {
             <CompareFiles left={code1} right={code2} />
           </Paper>
         </Grid>
-        <Grid item xs={12}>
-          <Button className={classes.button} variant="contained" color="primary" onClick={handleCompare}>
-            Compare
-          </Button>
+
+        <Grid container justify="space-between" alignItems="center">
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={analyze}>
+              Compare
+            </Button>
+          </Grid>
+          <Grid item>
+            <Button variant="contained" color="primary" onClick={analyze}>
+              Analyze
+            </Button>
+          </Grid>
         </Grid>
+        {result && (
+          <Container maxWidth="sm" className={classes.resultContainer}>
+            <Typography variant="h4" component="h1" align="center">
+              {castToMessage(result)}
+            </Typography>
+            <Typography variant="body1" align="center">
+            </Typography>
+          </Container>
+        )}
       </Grid>
     </div>
   );
