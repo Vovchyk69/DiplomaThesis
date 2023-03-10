@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using Antlr4.Runtime;
+using Antlr4.Runtime.Tree;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moss.Client;
@@ -8,7 +10,11 @@ using OpenAI.GPT3.Managers;
 using OpenAI.GPT3.ObjectModels;
 using OpenAI.GPT3.ObjectModels.RequestModels;
 using PlagiarismChecker.AmazonS3;
+using PlagiarismChecker.ANTLR;
+using PlagiarismChecker.Grammars;
 using PlagiarismChecker.POCO;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -109,6 +115,71 @@ namespace PlagiarismChecker.Controllers
 
             var response = await result.Content.ReadAsStringAsync();
             return Ok(response);
+        }
+
+        [HttpPost]
+        [Route("test")]
+        public async Task<object> Test(Documents document)
+        {
+            var document1 = await _awsStorage.DownloadFileAsync(document.document);
+
+            AntlrInputStream inputStream1 = new AntlrInputStream(document1);
+            JavaLexer speakLexer1 = new JavaLexer(inputStream1);
+            CommonTokenStream commonTokenStream1 = new CommonTokenStream(speakLexer1);
+            JavaParser parser1 = new JavaParser(commonTokenStream1);
+
+            // Parse the code and get the parse tree
+            JavaParser.CompilationUnitContext parseTree1 = parser1.compilationUnit();
+
+            var document2 = await _awsStorage.DownloadFileAsync("test1.java");
+
+            AntlrInputStream inputStream2 = new AntlrInputStream(document2);
+            JavaLexer speakLexer2 = new JavaLexer(inputStream2);
+            CommonTokenStream commonTokenStream2 = new CommonTokenStream(speakLexer2);
+            JavaParser parser2 = new JavaParser(commonTokenStream2);
+
+            // Parse the code and get the parse tree
+            JavaParser.CompilationUnitContext parseTree2 = parser2.compilationUnit();
+            // Create a listener or visitor and walk the parse tree to build the AST
+            var listener = new MyListener();
+            ParseTreeWalker.Default.Walk(listener, parseTree1);
+
+            // Get the methods from the listener
+            List<MethodNode> methods = listener.GetMethods(); 
+
+            var res =TreeComparer.TreeEditDistance(parseTree1, parseTree2);
+
+            var astVisitor = new JavaASTVisitor();
+            var ast = parseTree1.Accept(astVisitor);
+            var jsonTest = JsonSerializer.Serialize(ast);
+            return Ok(ast);
+        }
+
+        [HttpPost]
+        [Route("tokenize")]
+        public async Task<object> Tokenize(FilesToCompare files)
+        {
+            var document1 = await _awsStorage.DownloadFileAsync(files.FileName1);
+            var document2 = await _awsStorage.DownloadFileAsync(files.FileName2);
+
+            AntlrInputStream inputStream1 = new AntlrInputStream(document1);
+            JavaLexer speakLexer1 = new JavaLexer(inputStream1);
+            CommonTokenStream commonTokenStream1 = new CommonTokenStream(speakLexer1);
+            JavaParser parser1 = new JavaParser(commonTokenStream1);
+            JavaParser.CompilationUnitContext parseTree1 = parser1.compilationUnit();
+
+            AntlrInputStream inputStream2 = new AntlrInputStream(document2);
+            JavaLexer speakLexer2 = new JavaLexer(inputStream2);
+            CommonTokenStream commonTokenStream2 = new CommonTokenStream(speakLexer2);
+            JavaParser parser2 = new JavaParser(commonTokenStream2);
+            JavaParser.CompilationUnitContext parseTree2 = parser2.compilationUnit();
+
+
+
+            var astVisitor = new JavaASTVisitor();
+            var ast1 = parseTree1.Accept(astVisitor);
+            var ast2 = parseTree2.Accept(astVisitor);
+            return Ok(new { Ast1 = ast1, Ast2 = ast2 });
         }
     }
 }
