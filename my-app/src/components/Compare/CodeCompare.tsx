@@ -182,7 +182,9 @@ export const CodeCompare = (props: Props) => {
                     rootNodeClassName="node__root"
                     branchNodeClassName="node__branch"
                     leafNodeClassName="node__leaf"
-                    nodeSize={{ x: 500, y: 150 }}
+                    translate={{ x: 300, y: 20 }}
+                    nodeSize={{ x: 250, y: 150 }}
+                    zoom={0.4}
                     separation={{ siblings: 1, nonSiblings: 2 }}
                   />
                 </div>
@@ -203,7 +205,9 @@ export const CodeCompare = (props: Props) => {
                     rootNodeClassName="node__root"
                     branchNodeClassName="node__branch"
                     leafNodeClassName="node__leaf"
-                    nodeSize={{ x: 500, y: 150 }}
+                    translate={{ x: 300, y: 20 }}
+                    nodeSize={{ x: 250, y: 150 }}
+                    zoom={0.4}
                     separation={{ siblings: 1, nonSiblings: 2 }}
                   />
                 </div>

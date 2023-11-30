@@ -2,6 +2,8 @@
 using Antlr4.Runtime.Tree;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.Extensions.Logging;
 using Moss.Client;
 using Moss.Report.Client;
@@ -174,12 +176,23 @@ namespace PlagiarismChecker.Controllers
             JavaParser parser2 = new JavaParser(commonTokenStream2);
             JavaParser.CompilationUnitContext parseTree2 = parser2.compilationUnit();
 
-
-
             var astVisitor = new JavaASTVisitor();
             var ast1 = parseTree1.Accept(astVisitor);
             var ast2 = parseTree2.Accept(astVisitor);
+
+            var comparer = new AstComparer();
+            var result = comparer.GetSimilarityPercentage(ast1, ast2);
+
             return Ok(new { Ast1 = ast1, Ast2 = ast2 });
+        }
+
+        [HttpPost]
+        [Route("compare")]
+        public async Task<object> Compare(MyTrees trees)
+        {
+            var comparer = new AstComparer();
+            var result = comparer.GetSimilarityPercentage(trees.Node1, trees.Node2);
+            return Ok(result);
         }
     }
 }

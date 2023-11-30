@@ -74,7 +74,7 @@ const DiffComponent: React.FC<Props> = ({ left, right }) => {
         oldValue={left}
         newValue={right}
         splitView={true}
-        compareMethod={DiffMethod.LINES  }
+        compareMethod={DiffMethod.WORDS  }
         styles={defaultStyles}
         leftTitle={"Code 1"}
         rightTitle={"Code 2"}

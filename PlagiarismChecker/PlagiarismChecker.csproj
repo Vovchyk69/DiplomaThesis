@@ -17,6 +17,7 @@
     <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.103.22" />
     <PackageReference Include="Betalgo.OpenAI.GPT3" Version="6.7.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.5.0" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.11.1" />
     <PackageReference Include="Moss.Client" Version="1.0.0" />
     <PackageReference Include="Moss.Report.Client" Version="1.0.0" />
