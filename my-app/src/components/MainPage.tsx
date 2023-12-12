@@ -66,7 +66,7 @@ export const MainPage = () => {
         </Drawer>
         <main className={classes.content}>
           <Toolbar />
-          <CodeCompare items={myData.selectedFiles || []} />
+          <CodeCompare selectedItems={myData.selectedFiles || []} items={myData.files || []} />
         </main>
       </div>
     </div>

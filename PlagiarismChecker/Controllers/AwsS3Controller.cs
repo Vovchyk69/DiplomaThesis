@@ -1,10 +1,14 @@
-﻿using Microsoft.AspNetCore.Cors;
+﻿using System;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PlagiarismChecker.AmazonS3;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
+using Copyleaks.SDK.V3.API;
+using Newtonsoft.Json;
 
 namespace PlagiarismChecker.Controller
 {
@@ -70,7 +74,7 @@ namespace PlagiarismChecker.Controller
 
             foreach (var file in files)
                 await _awsStorage.UploadFileAsync(file);
-
+            
             return Ok(true);
         }
 

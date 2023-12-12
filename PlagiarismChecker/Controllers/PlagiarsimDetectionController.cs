@@ -20,8 +20,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using PlagiarismChecker.Visitor;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+
 namespace PlagiarismChecker.Controllers
 {
     [ApiController]
@@ -88,8 +91,8 @@ namespace PlagiarismChecker.Controllers
             var userid = 987654321;
             var client = new MossClient(userid, new MossClientOptions() { Language = MossLanguage.Csharp });
 
-            var document1 = await _awsStorage.DownloadFileAsync(files.FileName1);
-            var document2 = await _awsStorage.DownloadFileAsync(files.FileName2);
+            var document1 = await _awsStorage.DownloadFileAsync(files.FileNames[0]);
+            var document2 = await _awsStorage.DownloadFileAsync(files.FileNames[1]);
 
             var test = Encoding.UTF8.GetBytes(document1);
             client.AddFile(Encoding.UTF8.GetBytes(document1), fileDisplayName: "File 1");
@@ -151,7 +154,7 @@ namespace PlagiarismChecker.Controllers
 
             var res =TreeComparer.TreeEditDistance(parseTree1, parseTree2);
 
-            var astVisitor = new JavaASTVisitor();
+            var astVisitor = new JavaParserBaseVisitor<ASTNode>();
             var ast = parseTree1.Accept(astVisitor);
             var jsonTest = JsonSerializer.Serialize(ast);
             return Ok(ast);
@@ -161,29 +164,30 @@ namespace PlagiarismChecker.Controllers
         [Route("tokenize")]
         public async Task<object> Tokenize(FilesToCompare files)
         {
-            var document1 = await _awsStorage.DownloadFileAsync(files.FileName1);
-            var document2 = await _awsStorage.DownloadFileAsync(files.FileName2);
-
-            AntlrInputStream inputStream1 = new AntlrInputStream(document1);
-            JavaLexer speakLexer1 = new JavaLexer(inputStream1);
-            CommonTokenStream commonTokenStream1 = new CommonTokenStream(speakLexer1);
-            JavaParser parser1 = new JavaParser(commonTokenStream1);
-            JavaParser.CompilationUnitContext parseTree1 = parser1.compilationUnit();
-
-            AntlrInputStream inputStream2 = new AntlrInputStream(document2);
-            JavaLexer speakLexer2 = new JavaLexer(inputStream2);
-            CommonTokenStream commonTokenStream2 = new CommonTokenStream(speakLexer2);
-            JavaParser parser2 = new JavaParser(commonTokenStream2);
-            JavaParser.CompilationUnitContext parseTree2 = parser2.compilationUnit();
-
-            var astVisitor = new JavaASTVisitor();
-            var ast1 = parseTree1.Accept(astVisitor);
-            var ast2 = parseTree2.Accept(astVisitor);
-
+            var documents = files.FileNames.Select(x => _awsStorage.DownloadFileAsync(x));
+            var asts = new List<Node>();
+            var code = new List<string>();
+            foreach (var document in documents)
+            {
+                var doc = await document;
+                var inputStream = new AntlrInputStream(doc);
+                var speakLexer = new JavaLexer(inputStream);
+                var commonTokenStream = new CommonTokenStream(speakLexer);
+                var parser = new JavaParser(commonTokenStream);
+                var parseTree = parser.compilationUnit();
+                var astVisitor = new NewJavaAstVisitor();
+                var ast = parseTree.Accept(astVisitor);
+                asts.Add(ast);
+                code.Add(doc);
+            }
+            
             var comparer = new AstComparer();
-            var result = comparer.GetSimilarityPercentage(ast1, ast2);
+            var similarity = AstSimilarity.CalculateSimilarities(code);
 
-            return Ok(new { Ast1 = ast1, Ast2 = ast2 });
+            var settings = new JsonSerializerSettings();
+            settings.NullValueHandling = NullValueHandling.Ignore;
+
+            return Ok(new { Ast1 = asts[0], Ast2 = asts[1], Similarity = similarity });
         }
 
         [HttpPost]
@@ -193,6 +197,20 @@ namespace PlagiarismChecker.Controllers
             var comparer = new AstComparer();
             var result = comparer.GetSimilarityPercentage(trees.Node1, trees.Node2);
             return Ok(result);
+        }
+        
+        [HttpGet]
+        [Route("get-results")]
+        public async Task<object> GetResults()
+        {
+            using var clientHandler = new HttpClientHandler();
+            using var httpClient = new HttpClient(clientHandler);
+            httpClient.DefaultRequestHeaders.Add("Authorization", "Bearer BFFB0EE3995C3BE5F0E14A21FD6CC1FA63F9445EF01077351497BE119FE9B9DA");
+
+            var result = await httpClient.GetAsync("https://app.copyleaks.com/api/v1/dashboard/scan/4dv7prm6qmizzrf9/report/complete-results");
+
+            var response = await result.Content.ReadAsStringAsync();
+            return Ok(response);
         }
     }
 }

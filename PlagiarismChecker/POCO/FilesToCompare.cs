@@ -5,5 +5,5 @@ using System.Threading.Tasks;
 
 namespace PlagiarismChecker.POCO
 {
-    public record FilesToCompare(string FileName1, string FileName2);
+    public record FilesToCompare(List<string> FileNames);
 }

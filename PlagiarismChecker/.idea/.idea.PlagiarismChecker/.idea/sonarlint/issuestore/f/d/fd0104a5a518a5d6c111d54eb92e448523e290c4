@@ -1,0 +1,10 @@
+
+csharpsquid:S1450$"]Remove the field '_configuration' and declare it as a local variable in the relevant methods.(ºñ×ãıÿÿÿÿ
+ocsharpsquid:S4487""RRemove this unread private field '_loggers' or refactor the code to use its value.(ÁŞ°©
+\csharpsquid:S1075w"?Refactor your code not to use hardcoded absolute paths or URIs.(à­æ
+icsharpsquid:S1075Ò"?Refactor your code not to use hardcoded absolute paths or URIs.(çáğ—üÿÿÿÿ8İÑªœÅ1
+Jcsharpsquid:S1481a"(Remove the unused local variable 'test'.(Äî«çşÿÿÿÿ
+Icsharpsquid:S1481™"+Remove the unused local variable 'methods'.(˜¶´Œ
+Jcsharpsquid:S1481›"'Remove the unused local variable 'res'.( ’²…ÿÿÿÿÿ
+Icsharpsquid:S1481Ÿ",Remove the unused local variable 'jsonTest'.(«åq
+Vcsharpsquid:S1481¸",Remove the unused local variable 'comparer'.(ïè«şÿÿÿÿ8é˜«‘Â1

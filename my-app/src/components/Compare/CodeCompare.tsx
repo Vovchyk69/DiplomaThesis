@@ -11,6 +11,8 @@ import '../../index.css';
 import { Divider } from '@material-ui/core';
 import { MyContext } from '../Context/context';
 import { CloudUpload } from '@material-ui/icons';
+import MyModal from './Modal';
+import HistogramChart from './HistogramChart';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -23,8 +25,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(2),
     textAlign: 'left',
     color: theme.palette.text.secondary,
-    minHeight: '300px',
-    maxHeight: '500px',
+    minHeight: '700px',
     overflowY: 'auto',
   },
   code: {
@@ -65,18 +66,13 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 interface Props {
+  selectedItems: File[];
   items: File[];
 }
 
 const castToMessage = (result: any) => {
-  const percentage = result.documents[0].average_generated_prob;
-  if (percentage >= 0.95 && percentage <= 1)
-    return 'Your text is likely to be written entirely by AI';
 
-  if (percentage >= 0.65 && percentage <= 0.95)
-    return 'Your text may include parts written by AI';
-
-  return 'Your text is likely to be written entirely by Human';
+  return `Similarity Score ${result}`;
 };
 
 const transformJson = (json: any) => {
@@ -96,41 +92,40 @@ const transformJson = (json: any) => {
   return result;
 };
 
+
 export const CodeCompare = (props: Props) => {
   const { updateFiles } = useContext(MyContext);
   const classes = useStyles();
   const [code1, setCode1] = useState('');
   const [code2, setCode2] = useState('');
   const [result, setResult] = useState<any>(null);
+  const [showResult, setShowResult] = useState<boolean>(false);
+
   const [tree, setTree] = useState<any>(null);
 
   useEffect(() => {
-    if (props.items.length === 0) return;
+    if (props.selectedItems.length === 0) return;
     awsAPI
       .post(
         'filter',
-        props.items.map((x) => x.name)
+        props.selectedItems.map((x) => x.name)
       )
       .then((files: any) => {
         setCode1(files[0]);
         setCode2(files[1] || ' ');
       });
-  }, [props.items]);
+  }, [props.selectedItems]);
 
   const analyze = () => {
-    const gpt = detectionAPI.post('gpt-zero', {
-      document: props.items[0].name,
-    });
-
     const tokenize = detectionAPI.post('tokenize', {
-      fileName1: props.items[0].name,
-      fileName2: props.items[1].name,
+      fileNames: props.items.map(x => x.name),
     });
 
-    Promise.all([gpt, tokenize])
-      .then(([gptResult, jsonTree]) => {
-        setResult(gptResult);
+    Promise.all([tokenize])
+      .then(([jsonTree]) => {
+        const result = jsonTree as any;
         setTree(jsonTree);
+        setShowResult(true);
       })
       .catch((error: any) => console.log(error));
   };
@@ -153,6 +148,10 @@ export const CodeCompare = (props: Props) => {
         })
         .then((response) => console.log(response))
         .catch((error) => console.log(error));
+
+      detectionAPI.get('get-results').then((response)=>{
+        setResult(response)
+      });
     }
   };
 
@@ -161,68 +160,18 @@ export const CodeCompare = (props: Props) => {
       <Grid container spacing={3}>
         <Grid item xs={12}>
           <Paper className={classes.paper}>
-            <CompareFiles left={code1} right={code2} />
+            <CompareFiles left={code1} right={code2} className={classes.paper} ast1={tree?.ast1} ast2={tree?.ast2} />
           </Paper>
         </Grid>
         <Divider />
-        {tree ? (
-          <>
-            <Grid item xs={6}>
-              <Paper className={classes.paper}>
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100vh',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Tree
-                    data={transformJson(tree.ast1)}
-                    orientation="vertical"
-                    rootNodeClassName="node__root"
-                    branchNodeClassName="node__branch"
-                    leafNodeClassName="node__leaf"
-                    translate={{ x: 300, y: 20 }}
-                    nodeSize={{ x: 250, y: 150 }}
-                    zoom={0.4}
-                    separation={{ siblings: 1, nonSiblings: 2 }}
-                  />
-                </div>
-              </Paper>
-            </Grid>
-            <Grid item xs={6}>
-              <Paper className={classes.paper}>
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100vh',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <Tree
-                    data={transformJson(tree.ast2)}
-                    orientation="vertical"
-                    rootNodeClassName="node__root"
-                    branchNodeClassName="node__branch"
-                    leafNodeClassName="node__leaf"
-                    translate={{ x: 300, y: 20 }}
-                    nodeSize={{ x: 250, y: 150 }}
-                    zoom={0.4}
-                    separation={{ siblings: 1, nonSiblings: 2 }}
-                  />
-                </div>
-              </Paper>
-            </Grid>
-          </>
-        ) : undefined}
-        {result && (
+        {/* {result && (
           <Container maxWidth="sm" className={classes.resultContainer}>
             <Typography variant="h4" component="h1" align="center">
               {castToMessage(result)}
             </Typography>
             <Typography variant="body1" align="center"></Typography>
           </Container>
-        )}
+        )} */}
         <Grid container justify="space-between" alignItems="center">
           <Grid item>
             <Button
@@ -247,6 +196,7 @@ export const CodeCompare = (props: Props) => {
             </Button>
           </Grid>
         </Grid>
+        {showResult && tree && result && <HistogramChart data={result} simarity={tree?.similarity} items={props.items}/>}
       </Grid>
     </div>
   );

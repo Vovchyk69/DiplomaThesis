@@ -5,20 +5,12 @@ using PlagiarismChecker.Grammars;
 using System.Collections.Generic;
 using System.Linq;
 
-public record ASTNode
+public record ASTNode(string Type)
 {
-    public ASTNode(string type)
-    {
-        Type = type;
-        Children = new List<ASTNode>();
-        Metadata = new Dictionary<string, string>();
-    }
+    public string Type { get; } = Type;
+    public List<ASTNode> Children { get; } = new();
 
-    public string Type { get; set; }
-    public string Value { get; set; }
-    public List<ASTNode> Children { get; set; }
-
-    public Dictionary<string, string> Metadata { get; set; }
+    public Dictionary<string, string> Metadata { get; } = new();
 
     public void AddChild(ASTNode child)
     {
@@ -38,7 +30,7 @@ public record ASTNode
     public string ToPostOrderString()
     {
         var childrenStrings = Children.Select(child => child.ToPostOrderString()).ToArray();
-        var postOrderString = Value is null ? string.Join(",", childrenStrings) : string.Join(",", childrenStrings)+','+Value;
+        var postOrderString = string.Join(",", childrenStrings);
         return postOrderString;
     }
 
@@ -47,10 +39,10 @@ public class JavaASTVisitor : JavaParserBaseVisitor<ASTNode>
 {
     public override ASTNode VisitCompilationUnit([NotNull] JavaParser.CompilationUnitContext context)
     {
-        ASTNode rootNode = new ASTNode("Compilation Unit");
+        var rootNode = new ASTNode("Entry Point");
         for (int i = 0; i < context.ChildCount; i++)
         {
-            ASTNode childNode = context.GetChild(i).Accept(this);
+            var childNode = context.GetChild(i).Accept(this);
             if (childNode != null)
             {
                 rootNode.Children.Add(childNode);
@@ -75,6 +67,7 @@ public class JavaASTVisitor : JavaParserBaseVisitor<ASTNode>
     public override ASTNode VisitMethodDeclaration([NotNull] JavaParser.MethodDeclarationContext context)
     {
         ASTNode methodNode = new ASTNode("Method Declaration");
+        methodNode.Metadata.Add("title", context.identifier().GetText());
         return Traverse(methodNode, context);
     }
 
@@ -113,7 +106,7 @@ public class JavaASTVisitor : JavaParserBaseVisitor<ASTNode>
 
     public override ASTNode VisitStatement([NotNull] JavaParser.StatementContext context)
     {
-        var methodNode = new ASTNode("Statement");
+        var methodNode = new ASTNode("Statement:");
         methodNode.Metadata.Add("title", context.GetText());
         return Traverse(methodNode, context);
     }
@@ -221,15 +214,15 @@ public class JavaASTVisitor : JavaParserBaseVisitor<ASTNode>
             var test = context.GetChild(i).GetText();
             var type = context.GetChild(i).GetType();
             var childNode = context.GetChild(i).Accept(this);
-            if (childNode != null)
-            {
-                var finalNode = Types.Contains(childNode.Type) ? childNode with { Value = context.GetChild(i).GetText() } : childNode;
-                node.Children.Add(finalNode);
-            }
+            if (childNode == null) continue;
+            if (!NodesToSkip.Contains(childNode.Type))
+                node.Children.Add(childNode);
         }
         return node;
     }
 
     private List<string> Types = new() { "Type", "Variable Declarator", "Expression", "Identifier" };
     private static string operators = "+-=*/^";
+
+    private List<string> NodesToSkip = new() { "Parameter List", "Method Body", "Class Body", "Identifier" };
 }

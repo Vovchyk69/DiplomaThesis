@@ -1,0 +1,11 @@
+
+}csharpsquid:S101&"aRename class 'JavaASTVisitor' to match pascal case naming rules, consider using 'JavaAstVisitor'.(¼²ôÂ
+ucsharpsquid:S101"TRename record 'ASTNode' to match pascal case naming rules, consider using 'AstNode'.(šéâõıÿÿÿÿ
+Jcsharpsquid:S3903&"-Move 'JavaASTVisitor' into a named namespace.(¼²ôÂ
+Hcsharpsquid:S3903"&Move 'ASTNode' into a named namespace.(šéâõıÿÿÿÿ
+=csharpsquid:S2933à"Make 'Types' 'readonly'.(‹ôõ¥8©ìùÂ1
+Bcsharpsquid:S2933ã"Make 'NodesToSkip' 'readonly'.(²´l8ªìùÂ1
+Mcsharpsquid:S1144à"(Remove the unused private field 'Types'.(‹ôõ¥8ªìùÂ1
+Kcsharpsquid:S1481­"(Remove the unused local variable 'test'.(í ğñùÿÿÿÿ
+Rcsharpsquid:S1481Ö"(Remove the unused local variable 'test'.(ã“ÙÂıÿÿÿÿ8€…Â1
+Kcsharpsquid:S1481×"(Remove the unused local variable 'type'.(’™á®øÿÿÿÿ

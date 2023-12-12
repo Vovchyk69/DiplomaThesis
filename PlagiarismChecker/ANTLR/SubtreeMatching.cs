@@ -6,13 +6,10 @@ class AstComparer
 {
     public float GetSimilarityPercentage(ASTNode tree1, ASTNode tree2)
     {
-        //var commonSubtrees = FindCommonSubtrees(tree1, tree2);
         var totalNodes = CountNodes(tree1) + CountNodes(tree2);
-        //var commonNodes = commonSubtrees.Sum(t => CountNodes(t));
         var treeEditDistance = CalculateTreeEditDistance(tree1, tree2);
 
         return treeEditDistance* 1.0f / totalNodes;
-        //return (2f * commonNodes) / (totalNodes + treeEditDistance);
     }
 
     public static List<ASTNode> FindCommonSubtrees(ASTNode root1, ASTNode root2)
@@ -42,7 +39,7 @@ class AstComparer
 
     private int CountNodes(ASTNode tree)
     {
-        var increment = tree.Value == null ? 0 : 1;
+        var increment = 0;
         return increment + tree.Children.Sum(CountNodes);
     }
 
